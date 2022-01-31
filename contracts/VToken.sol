@@ -1,3 +1,5 @@
+pragma solidity ^0.6.2;
+
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -18,13 +20,13 @@ contract VToken is Ownable {
         decimals = 18;
     }
 
-    function mintFor(address recipient, uint256 amount) external onlyOwner {
-       balanceOf[recipient] = balanceOf[recipient].add(amount);
-       totalSupply = totalSupply.add(amount);
+    function mint(address _to, uint256 _amount) external onlyOwner {
+       balanceOf[_to] = balanceOf[_to].add(_amount);
+       totalSupply = totalSupply.add(_amount);
     }
 
-    function burn(uint256 amount) external {
-       balanceOf[msg.sender] = balanceOf[msg.sender].sub(amount);
-       totalSupply = totalSupply.sub(amount);
+    function burn(uint256 _amount) external {
+       balanceOf[msg.sender] = balanceOf[msg.sender].sub(_amount);
+       totalSupply = totalSupply.sub(_amount);
     }
 }
