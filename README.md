@@ -13,8 +13,10 @@ VTokenToToken - user can convert vtoken to token without loss time %
 Token - standrad mintable and burnable token
 
 
-Minter - allow mint for permitted addresses 
+Minter - allow mint for permitted addresses
 
+
+LDManager - mint tokens and add LD with token/eth 
 ```
 
 
