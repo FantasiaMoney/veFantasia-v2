@@ -6,7 +6,7 @@ import "./interfaces/IBurn.sol";
 import "./interfaces/IMint.sol";
 
 contract TokenToVToken {
-  using SafeERC20 for IERC20
+  using SafeERC20 for IERC20;
 
   IERC20 public token;
   address public vToken;
@@ -18,7 +18,7 @@ contract TokenToVToken {
 
   function convert(address _to, uint256 _amount) external {
     token.safeTransferFrom(msg.sender, address(this), _amount);
-    IBurn(token).burn(_amount);
+    IBurn(address(token)).burn(_amount);
     IMint(vToken).mint(_to, _amount);
   }
 }

@@ -20,6 +20,6 @@ contract Minter is Ownable {
 
   function mint(address _to, uint256 _amount) external {
     require(permitted[msg.sender], "Not permitted");
-    IMint(address).mint(_to, _amount);
+    IMint(token).mint(_to, _amount);
   }
 }

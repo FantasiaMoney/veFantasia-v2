@@ -61,7 +61,7 @@ contract VTokenSale is Ownable {
     // transfer ETH from user to receiver
     beneficiary.transfer(msg.value);
     // transfer mbtc to user
-    IMint(_vToken).mint(_to, sendAmount);
+    IMint(vToken).mint(_to, sendAmount);
     // event
     emit Buy(_to, sendAmount);
   }

@@ -4,8 +4,6 @@ import "./interfaces/IBurn.sol";
 import "./interfaces/IMint.sol";
 
 contract VTokenToToken {
-  using SafeERC20 for IERC20
-
   address public token;
   address public vToken;
 
