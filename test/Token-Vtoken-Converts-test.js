@@ -87,7 +87,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     tokenToVToken = await TokenToVToken.new(token.address, vTokenMinter.address)
 
     // deploy LD manager
-    ldManager = await LDManager.new(uniRouter.address, token.address)
+    ldManager = await LDManager.new(uniRouter.address, token.address, tokenMinter.address)
 
     // deploy V sale
     vTokenSale = await VTokenSale.new(
@@ -117,7 +117,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
   })
 
   describe('token', function() {
-    it('can be converter from vToken to token', async function() {
+    it('can be converter from vToken to token and supplies changed', async function() {
       const tokenSupplyBefore = await token.totalSupply()
       // buy some vtoken
       await vTokenSale.buyFor(userOne, { from:userOne, value:toWei("1") })
@@ -131,6 +131,16 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
 
       assert.isTrue(Number(tokenSupplyBefore) < Number(await token.totalSupply()))
       assert.isTrue(Number(vTokenSupplyBefore) > Number(await vToken.totalSupply()))
+    })
+
+    it('LD manager mint token and LD ', async function() {
+      const tokenSupplyBefore = await token.totalSupply()
+      const totalLDBefore = await pair.totalSupply()
+
+      await ldManager.addLiquidity({ from:userOne, value:toWei("10") })
+
+      assert.isTrue(Number(tokenSupplyBefore) < Number(await token.totalSupply()))
+      assert.isTrue(Number(totalLDBefore) < Number(await pair.totalSupply()))
     })
   })
 

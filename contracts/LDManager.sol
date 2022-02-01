@@ -6,17 +6,25 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract LDManager {
   IUniswapV2Router02 public Router;
   address public token;
+  address public tokenMinter;
 
-  constructor(address _Router, address _token) public {
+  constructor(
+    address _Router,
+    address _token,
+    address _tokenMinter
+  )
+   public
+  {
      Router = IUniswapV2Router02(_Router);
      token = _token;
+     tokenMinter = _tokenMinter;
   }
 
   function addLiquidity() external payable {
      //get price
      uint256 tokenAmount = getTokenPrice(msg.value);
      // mint tokens
-     IMint(token).mint(address(this), tokenAmount);
+     IMint(tokenMinter).mint(address(this), tokenAmount);
      // approve token transfer to cover all possible scenarios
      IERC20(token).approve(address(Router), tokenAmount);
      // add the liquidity
