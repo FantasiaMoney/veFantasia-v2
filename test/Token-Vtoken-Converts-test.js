@@ -84,7 +84,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     vTokenToToken = await VTokenToToken.new(token.address, vToken.address)
 
     // deploy token to vToken converter
-    tokenToVToken = await TokenToVToken.new(token.address, vToken.address)
+    tokenToVToken = await TokenToVToken.new(token.address, vTokenMinter.address)
 
     // deploy LD manager
     ldManager = await LDManager.new(uniRouter.address, token.address)
@@ -92,7 +92,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     // deploy V sale
     vTokenSale = await VTokenSale.new(
       token.address,
-      vToken.address,
+      vTokenMinter.address,
       userOne, // BENEFICIARY
       uniRouter.address
     )
@@ -113,6 +113,42 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
   describe('INIT', function() {
     it('token should be added in LD DEX', async function() {
       assert.equal(await pair.totalSupply(), toWei(String(500)))
+    })
+  })
+
+
+  describe('vToken', function() {
+    it('can be converted from token to vToken and supplies changed', async function() {
+      const tokenSupplyBefore = await token.totalSupply()
+      const vTokenSupplyBefore = await vToken.totalSupply()
+
+      assert.equal(await vToken.balanceOf(userOne), 0)
+      await token.approve(tokenToVToken.address, toWei("1"))
+      await tokenToVToken.convert(userOne, toWei("1"))
+      assert.equal(await vToken.balanceOf(userOne), toWei("1"))
+
+      assert.isTrue(Number(tokenSupplyBefore) > Number(await token.totalSupply()))
+      assert.isTrue(Number(vTokenSupplyBefore) < Number(await vToken.totalSupply()))
+    })
+
+    it('can buy vToken via sale and vToken supply inreased', async function() {
+      const vTokenSupplyBefore = await vToken.totalSupply()
+      const rate = await uniRouter.getAmountsOut(
+        toWei("1"),
+        [weth.address, token.address]
+      )
+
+      const shouldRecive = rate[1]
+
+      assert.equal(await vToken.balanceOf(userOne), 0)
+      await vTokenSale.buyFor(userOne, { from:userOne, value:toWei("1") })
+
+      assert.equal(
+        Number(await vToken.balanceOf(userOne)),
+        Number(shouldRecive)
+      )
+
+      assert.isTrue(Number(vTokenSupplyBefore) < Number(await vToken.totalSupply()))
     })
   })
 

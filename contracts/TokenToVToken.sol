@@ -9,16 +9,16 @@ contract TokenToVToken {
   using SafeERC20 for IERC20;
 
   IERC20 public token;
-  address public vToken;
+  address public vTokenMinter;
 
-  constructor(address _token, address _vToken) public {
+  constructor(address _token, address _vTokenMinter) public {
     token = IERC20(_token);
-    vToken = _vToken;
+    vTokenMinter = _vTokenMinter;
   }
 
   function convert(address _to, uint256 _amount) external {
     token.safeTransferFrom(msg.sender, address(this), _amount);
     IBurn(address(token)).burn(_amount);
-    IMint(vToken).mint(_to, _amount);
+    IMint(vTokenMinter).mint(_to, _amount);
   }
 }

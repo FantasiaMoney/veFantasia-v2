@@ -14,7 +14,7 @@ contract VTokenSale is Ownable {
 
   address payable public beneficiary;
   address public token;
-  address public vToken;
+  address public vTokenMinter;
   IUniswapV2Router02 public Router;
 
   event Buy(address indexed user, uint256 amount);
@@ -23,20 +23,20 @@ contract VTokenSale is Ownable {
   * @dev constructor
   *
   * @param _token         token address
-  * @param _vToken        vToken address
+  * @param _vTokenMinter  vTokenMinter address
   * @param _beneficiary   Address for receive ETH
   * @param _router        Uniswap v2 router
   */
   constructor(
     address _token,
-    address _vToken,
+    address _vTokenMinter,
     address payable _beneficiary,
     address _router
     )
     public
   {
     token = _token;
-    vToken = _vToken;
+    vTokenMinter = _vTokenMinter;
     beneficiary = _beneficiary;
     Router = IUniswapV2Router02(_router);
   }
@@ -61,7 +61,7 @@ contract VTokenSale is Ownable {
     // transfer ETH from user to receiver
     beneficiary.transfer(msg.value);
     // transfer mbtc to user
-    IMint(vToken).mint(_to, sendAmount);
+    IMint(vTokenMinter).mint(_to, sendAmount);
     // event
     emit Buy(_to, sendAmount);
   }
