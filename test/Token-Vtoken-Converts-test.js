@@ -13,9 +13,6 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-const ETH_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
-
-const url = "https://gateway.pinata.cloud/ipfs/QmNVZdcfwaadBzKkDFfGXtqNdKwEbMsQY5xZJxfSxNcK2i/1/"
 
 // real contracts
 const UniswapV2Factory = artifacts.require('./UniswapV2Factory.sol')

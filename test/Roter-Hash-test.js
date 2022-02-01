@@ -13,7 +13,6 @@ require('chai')
   .use(require('chai-bignumber')(BigNumber))
   .should()
 
-const ETH_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 
 // real contracts
 const UniswapV2Factory = artifacts.require('./UniswapV2Factory.sol')
