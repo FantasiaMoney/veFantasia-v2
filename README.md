@@ -1,3 +1,12 @@
+# TODO
+
+```
+Gradualy time based convert vToken from Token
+
+
+```
+
+
 # Description
 
 ```
@@ -16,7 +25,7 @@ Token - standrad mintable and burnable token
 Minter - allow mint for permitted addresses
 
 
-LDManager - mint tokens and add LD with token/eth 
+LDManager - mint tokens and add LD with token/eth
 ```
 
 
