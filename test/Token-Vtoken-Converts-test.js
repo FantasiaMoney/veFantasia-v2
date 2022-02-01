@@ -81,7 +81,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     vToken.transferOwnership(vTokenMinter.address)
 
     // deploy vToken to token converter
-    vTokenToToken = await VTokenToToken.new(token.address, vToken.address)
+    vTokenToToken = await VTokenToToken.new(tokenMinter.address, vToken.address)
 
     // deploy token to vToken converter
     tokenToVToken = await TokenToVToken.new(token.address, vTokenMinter.address)
@@ -116,6 +116,23 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     })
   })
 
+  describe('token', function() {
+    it('can be converter from vToken to token', async function() {
+      const tokenSupplyBefore = await token.totalSupply()
+      // buy some vtoken
+      await vTokenSale.buyFor(userOne, { from:userOne, value:toWei("1") })
+      const vTokenRecieved = await vToken.balanceOf(userOne)
+      assert.isTrue(Number(vTokenRecieved) > 0)
+
+      const vTokenSupplyBefore = await vToken.totalSupply()
+
+      await vToken.approveBurn(vTokenToToken.address, vTokenRecieved)
+      await vTokenToToken.convert(userOne, vTokenRecieved)
+
+      assert.isTrue(Number(tokenSupplyBefore) < Number(await token.totalSupply()))
+      assert.isTrue(Number(vTokenSupplyBefore) > Number(await vToken.totalSupply()))
+    })
+  })
 
   describe('vToken', function() {
     it('can be converted from token to vToken and supplies changed', async function() {

@@ -4,16 +4,16 @@ import "./interfaces/IBurn.sol";
 import "./interfaces/IMint.sol";
 
 contract VTokenToToken {
-  address public token;
+  address public tokenMinter;
   address public vToken;
 
-  constructor(address _token, address _vToken) public {
-    token = _token;
+  constructor(address _tokenMinter, address _vToken) public {
+    tokenMinter = _tokenMinter;
     vToken = _vToken;
   }
 
   function convert(address _to, uint256 _amount) external {
-    IBurn(vToken).burn(_amount);
-    IMint(token).mint(_to, _amount);
+    IBurn(vToken).burnFrom(_to, _amount);
+    IMint(tokenMinter).mint(_to, _amount);
   }
 }

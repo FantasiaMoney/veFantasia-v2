@@ -7,6 +7,7 @@ contract VToken is Ownable {
     using SafeMath for uint256;
 
     mapping (address => uint256) public balanceOf;
+    mapping (address => mapping (address => uint256)) public allowanceBurn;
 
     string public name;
     string public symbol;
@@ -28,5 +29,15 @@ contract VToken is Ownable {
     function burn(uint256 _amount) external {
        balanceOf[msg.sender] = balanceOf[msg.sender].sub(_amount);
        totalSupply = totalSupply.sub(_amount);
+    }
+
+    function burnFrom(address _to, uint256 _amount) external {
+       require(allowanceBurn[_to][msg.sender] >= _amount, "Not allowed");
+       balanceOf[_to] = balanceOf[_to].sub(_amount);
+       totalSupply = totalSupply.sub(_amount);
+    }
+
+    function approveBurn(address _spender, uint256 _amount) external {
+       allowanceBurn[msg.sender][_spender] = _amount;
     }
 }
