@@ -95,7 +95,9 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     vTokenSale = await VTokenSale.new(
       token.address,
       vTokenMinter.address,
-      userOne, // BENEFICIARY
+      userOne, // dev BENEFICIARY
+      userOne, // charity BENEFICIARY
+      ldManager.address,
       uniRouter.address
     )
 

@@ -93,7 +93,9 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
     vTokenSale = await VTokenSale.new(
       token.address,
       vTokenMinter.address,
-      userOne, // BENEFICIARY
+      userOne, // dev BENEFICIARY
+      userOne, // charity BENEFICIARY
+      ldManager.address,
       uniRouter.address
     )
 
@@ -158,8 +160,10 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
       assert.isTrue(Number(vTokenSupplyBefore) < Number(await vToken.totalSupply()))
     })
 
-    it('can buy vToken via sale and vToken supply inreased', async function() {
+    it('can buy vToken via sale and vToken supply and LD inreased', async function() {
       const vTokenSupplyBefore = await vToken.totalSupply()
+      const totalLDBefore = await pair.totalSupply()
+
       const rate = await uniRouter.getAmountsOut(
         toWei("1"),
         [weth.address, token.address]
@@ -176,6 +180,7 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
       )
 
       assert.isTrue(Number(vTokenSupplyBefore) < Number(await vToken.totalSupply()))
+      assert.isTrue(Number(totalLDBefore) < Number(await pair.totalSupply()))
     })
   })
 
