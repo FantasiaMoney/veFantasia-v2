@@ -107,6 +107,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     await tokenMinter.updatePermittion(ldManager.address, true)
     await tokenMinter.updatePermittion(vTokenToToken.address, true)
 
+    // deploy fetch
     fetch = await Fetch.new(
       weth.address,
       uniRouter.address,
@@ -115,6 +116,9 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       tokenToVToken.address,
       vToken.address
     )
+
+    // set fetch
+    await vTokenToToken.setFetch(fetch.address)
   }
 
   beforeEach(async function() {
@@ -149,6 +153,61 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
         "Deposit length after ",
         Number(await fetch.totalUserDeposits(userTwo))
       )
+    })
+
+
+    it('Convert vToken to token after fetch', async function() {
+      console.log(
+        "Token before ",
+        Number(fromWei(await token.balanceOf(userTwo)))
+      )
+
+      // deposit in fetch
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      // increase time
+      await timeMachine.advanceTimeAndBlock(duration.days(365))
+      // reedem
+      await vToken.approveBurn(vTokenToToken.address, toWei(String(1)), { from:userTwo })
+      await vTokenToToken.convert(userTwo, 0, toWei(String(1)), { from:userTwo })
+
+      console.log(
+        "Token after ",
+        Number(fromWei(await token.balanceOf(userTwo)))
+      )
+    })
+
+
+    it('TODO can not deposit twice', async function() {
+
+    })
+
+    it('TODO after ahead of time can not reedem more than 1 to 1', async function() {
+
+    })
+
+    it('TODO can not reedem not existing index', async function() {
+
+    })
+
+
+    it('Calculate reedem', async function() {
+      // deposit in fetch
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      const depositData = await fetch.depositsPerUser(userTwo, 0)
+      const userBalance = depositData[1] - depositData[0]
+
+      let totalDays = 0
+      for(let i = 0; i<12; i++){
+        // increase time
+        await timeMachine.advanceTimeAndBlock(duration.days(30))
+        totalDays += 30
+        console.log(
+          `Token receive on day ${totalDays} - `,
+          Number(
+            fromWei(await vTokenToToken.calculateReturn(depositData[2], String(userBalance)))
+          ).toFixed(2)
+        )
+      }
     })
   })
   //END

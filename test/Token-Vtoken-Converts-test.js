@@ -116,22 +116,6 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
   })
 
   describe('token', function() {
-    it('can be converter from vToken to token and supplies changed', async function() {
-      const tokenSupplyBefore = await token.totalSupply()
-      // buy some vtoken
-      await vTokenSale.buyFor(userOne, { from:userOne, value:toWei("1") })
-      const vTokenRecieved = await vToken.balanceOf(userOne)
-      assert.isTrue(Number(vTokenRecieved) > 0)
-
-      const vTokenSupplyBefore = await vToken.totalSupply()
-
-      await vToken.approveBurn(vTokenToToken.address, vTokenRecieved)
-      await vTokenToToken.convert(userOne, vTokenRecieved)
-
-      assert.isTrue(Number(tokenSupplyBefore) < Number(await token.totalSupply()))
-      assert.isTrue(Number(vTokenSupplyBefore) > Number(await vToken.totalSupply()))
-    })
-
     it('LD manager mint token and LD ', async function() {
       const tokenSupplyBefore = await token.totalSupply()
       const totalLDBefore = await pair.totalSupply()
