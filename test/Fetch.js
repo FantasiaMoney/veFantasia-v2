@@ -156,7 +156,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     })
 
 
-    it('Convert vToken to token after fetch', async function() {
+    it('convert vToken to token after fetch', async function() {
       console.log(
         "Token before ",
         Number(fromWei(await token.balanceOf(userTwo)))
@@ -189,7 +189,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
         "Real balance",
         Number(fromWei(await vToken.balanceOf(userTwo)))
       )
-      
+
       assert.equal(
         Number(fromWei(String(userBalance))),
         Number(fromWei(await vToken.balanceOf(userTwo)))
@@ -197,16 +197,49 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     })
 
 
-    it('TODO can not deposit twice', async function() {
-
+    it('can not reedem same deposit twice', async function() {
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      await vToken.approveBurn(vTokenToToken.address, toWei(String(2)), { from:userTwo })
+      await vTokenToToken.convert(userTwo, 0, toWei(String(1)), { from:userTwo })
+      await vTokenToToken.convert(userTwo, 0, toWei(String(1)), { from:userTwo })
+      .should.be.rejectedWith(EVMRevert)
     })
 
-    it('TODO after ahead of time can not reedem more than 1 to 1', async function() {
-
+    it('can not reedem not existing index', async function() {
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      await vToken.approveBurn(vTokenToToken.address, toWei(String(1)), { from:userTwo })
+      await vTokenToToken.convert(userTwo, 1, toWei(String(1)), { from:userTwo })
+      .should.be.rejectedWith(EVMRevert)
     })
 
-    it('TODO can not reedem not existing index', async function() {
+    it('after ahead of time can not reedem more than 1 to 1', async function() {
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
 
+      console.log(
+        "Vtoken before reedem ",
+        Number(fromWei(await vToken.balanceOf(userTwo)))
+      )
+
+      await vToken.approveBurn(vTokenToToken.address, toWei(String(1)), { from:userTwo })
+      await timeMachine.advanceTimeAndBlock(duration.days(900))
+      await vTokenToToken.convert(userTwo, 0, toWei(String(1)), { from:userTwo })
+
+      const reedemed = Number(fromWei(await token.balanceOf(userTwo)))
+
+      console.log(
+        "Vtoken after reedem ",
+        Number(fromWei(await vToken.balanceOf(userTwo)))
+      )
+
+      console.log(
+        "Reedemed amount after 900 days ",
+         reedemed
+      )
+
+      assert.isTrue(
+        reedemed <= 1
+      )
     })
 
 
