@@ -177,6 +177,26 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     })
 
 
+    it('to reedem should be calculated correct', async function() {
+      // deposit in fetch
+      await fetch.convert({ from:userTwo, value:toWei(String(1)) })
+      const depositData = await fetch.depositsPerUser(userTwo, 0)
+      const userBalance = depositData[1] - depositData[0]
+
+      console.log(
+        "To reedem",
+        Number(fromWei(String(userBalance))),
+        "Real balance",
+        Number(fromWei(await vToken.balanceOf(userTwo)))
+      )
+      
+      assert.equal(
+        Number(fromWei(String(userBalance))),
+        Number(fromWei(await vToken.balanceOf(userTwo)))
+      )
+    })
+
+
     it('TODO can not deposit twice', async function() {
 
     })
