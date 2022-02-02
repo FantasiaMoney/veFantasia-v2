@@ -124,8 +124,8 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
   describe('Fetch', function() {
     it('Convert input to vToken', async function() {
       console.log(
-        "Purchase length before ",
-        Number(await fetch.totalUserPurchases(userTwo))
+        "Deposit length before ",
+        Number(await fetch.totalUserDeposits(userTwo))
       )
 
       // user two not hold any vtoken before deposit
@@ -146,8 +146,8 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       assert.equal(Number(await token.balanceOf(fetch.address)), 0)
 
       console.log(
-        "Purchase length after ",
-        Number(await fetch.totalUserPurchases(userTwo))
+        "Deposit length after ",
+        Number(await fetch.totalUserDeposits(userTwo))
       )
     })
   })

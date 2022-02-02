@@ -16,13 +16,13 @@ contract Fetch is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  struct Purchase {
+  struct Deposit {
     uint256 balanceBefore;
     uint256 balanceAfter;
     uint256 time;
   }
 
-  mapping (address => Purchase[]) public purchasePerUser;
+  mapping (address => Deposit[]) public depositsPerUser;
 
   address public WETH;
 
@@ -95,8 +95,8 @@ contract Fetch is Ownable {
     uint256 balanceAfter = IERC20(vToken).balanceOf(receiver);
 
     // write data
-    Purchase memory purchase = Purchase(balanceBefore, balanceAfter, now);
-    purchasePerUser[receiver].push(purchase);
+    Deposit memory deposit = Deposit(balanceBefore, balanceAfter, now);
+    depositsPerUser[receiver].push(deposit);
   }
 
 
@@ -191,15 +191,15 @@ contract Fetch is Ownable {
 
 
  /**
- * @dev return length of all user purchases
+ * @dev return length of all user deposits
  */
- function totalUserPurchases(address user)
+ function totalUserDeposits(address user)
    external
    view
    returns(uint256)
  {
-    Purchase[] memory purchase = purchasePerUser[user];
-    return purchase.length;
+    Deposit[] memory deposits = depositsPerUser[user];
+    return deposits.length;
  }
 
  fallback() external payable {}
