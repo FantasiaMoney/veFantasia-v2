@@ -1,11 +1,5 @@
 # TODO
 
-```
-Gradualy time based convert vToken from Token
-
-
-```
-
 
 # Description
 
@@ -16,7 +10,10 @@ VToken - not transfer able token (bind with msg.sender)
 VTokenSale - user can buy vToken via ETH by token/eth rate
 
 
-VTokenToToken - user can convert vtoken to token without loss time %
+VTokenToToken - user can convert vToken to token with time based rate
+
+
+TokenToVtoken - user can convert token to vToken with rate 1 to 1
 
 
 Token - standrad mintable and burnable token
