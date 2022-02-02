@@ -16,11 +16,21 @@ contract Fetch is Ownable {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
+  struct Purchase {
+    uint256 balanceBefore;
+    uint256 balanceAfter;
+    uint256 time;
+  }
+
+  mapping (address => Purchase[]) public purchasePerUser;
+
   address public WETH;
 
   address public dexRouter;
 
   address public token;
+
+  address public vToken;
 
   address public sale;
 
@@ -38,13 +48,15 @@ contract Fetch is Ownable {
   * @param _token                 address of OHM token
   * @param _sale                  sale
   * @param _tokenToVToken         token to vToken converter
+  * @param _vToken                not transferable vote token
   */
   constructor(
     address _WETH,
     address _dexRouter,
     address _token,
     address _sale,
-    address _tokenToVToken
+    address _tokenToVToken,
+    address _vToken
     )
     public
   {
@@ -53,6 +65,7 @@ contract Fetch is Ownable {
     token = _token;
     sale = _sale;
     tokenToVToken = _tokenToVToken;
+    vToken = _vToken;
   }
 
   // convert for msg.sender
@@ -70,12 +83,20 @@ contract Fetch is Ownable {
   */
   function _convertFor(address receiver) internal {
     require(msg.value > 0, "zerro eth");
+    uint256 balanceBefore = IERC20(vToken).balanceOf(receiver);
+
     // swap ETH
     swapETHInput(receiver, msg.value);
     // convert remains
     uint256 remains = IERC20(token).balanceOf(address(this));
     IERC20(token).approve(tokenToVToken, remains);
     IConvert(tokenToVToken).convert(receiver, remains);
+
+    uint256 balanceAfter = IERC20(vToken).balanceOf(receiver);
+
+    // write data
+    Purchase memory purchase = Purchase(balanceBefore, balanceAfter, now);
+    purchasePerUser[receiver].push(purchase);
   }
 
 
@@ -166,6 +187,19 @@ contract Fetch is Ownable {
    onlyOwner
  {
    payable(owner()).transfer(address(this).balance);
+ }
+
+
+ /**
+ * @dev return length of all user purchases
+ */
+ function totalUserPurchases(address user)
+   external
+   view
+   returns(uint256)
+ {
+    Purchase[] memory purchase = purchasePerUser[user];
+    return purchase.length;
  }
 
  fallback() external payable {}

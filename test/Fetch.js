@@ -112,7 +112,8 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       uniRouter.address,
       token.address,
       vTokenSale.address,
-      tokenToVToken.address
+      tokenToVToken.address,
+      vToken.address
     )
   }
 
@@ -122,6 +123,11 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
 
   describe('Fetch', function() {
     it('Convert input to vToken', async function() {
+      console.log(
+        "Purchase length before ",
+        Number(await fetch.totalUserPurchases(userTwo))
+      )
+
       // user two not hold any vtoken before deposit
       assert.equal(Number(await vToken.balanceOf(userTwo)), 0)
       // deposit
@@ -138,6 +144,11 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       assert.equal(Number(await weth.balanceOf(fetch.address)), 0)
       // fetch send all tokens
       assert.equal(Number(await token.balanceOf(fetch.address)), 0)
+
+      console.log(
+        "Purchase length after ",
+        Number(await fetch.totalUserPurchases(userTwo))
+      )
     })
   })
   //END
