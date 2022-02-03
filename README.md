@@ -1,5 +1,14 @@
 # TODO
 
+```
+DAO voting
+
+Treasury
+
+revdao
+
+team wallet 
+```
 
 # Description
 
