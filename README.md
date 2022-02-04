@@ -3,11 +3,11 @@
 ```
 DAO voting
 
-Treasury
+dao vote treasury
 
-revdao
+LDM reserve
 
-team wallet 
+So need create reserve in which users can put their tokens, and LDM will not use mint if can use reserve ?
 ```
 
 # Description
@@ -32,6 +32,9 @@ Minter - allow mint for permitted addresses
 
 
 LDManager - mint tokens and add LD with token/eth
+
+
+WalletDistributor - owners of vtoken can claim from this wallet each 30 days 
 ```
 
 

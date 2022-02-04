@@ -116,6 +116,10 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
   })
 
   describe('token', function() {
+    it('token decimals should be 9 ', async function() {
+
+    })
+
     it('LD manager mint token and LD ', async function() {
       const tokenSupplyBefore = await token.totalSupply()
       const totalLDBefore = await pair.totalSupply()
