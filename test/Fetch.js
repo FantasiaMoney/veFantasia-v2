@@ -87,7 +87,12 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     tokenToVToken = await TokenToVToken.new(token.address, vTokenMinter.address)
 
     // deploy LD manager
-    ldManager = await LDManager.new(uniRouter.address, token.address, tokenMinter.address)
+    ldManager = await LDManager.new(
+      uniRouter.address,
+      token.address,
+      tokenMinter.address,
+      userOne // treasury
+    )
 
     // deploy V sale
     vTokenSale = await VTokenSale.new(

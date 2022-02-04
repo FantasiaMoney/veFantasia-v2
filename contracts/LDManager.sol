@@ -7,17 +7,20 @@ contract LDManager {
   IUniswapV2Router02 public Router;
   address public token;
   address public tokenMinter;
+  address public treasury;
 
   constructor(
     address _Router,
     address _token,
-    address _tokenMinter
+    address _tokenMinter,
+    address _treasury
   )
    public
   {
      Router = IUniswapV2Router02(_Router);
      token = _token;
      tokenMinter = _tokenMinter;
+     treasury = _treasury;
   }
 
   function addLiquidity() external payable {
@@ -33,8 +36,8 @@ contract LDManager {
        tokenAmount,
        0, // slippage is unavoidable
        0, // slippage is unavoidable
-       address(0x000000000000000000000000000000000000dEaD),
-       block.timestamp
+       treasury,
+       block.timestamp + 15 minutes
      );
   }
 
