@@ -66,5 +66,21 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
       )
     })
   })
+
+  describe('Unvote', function() {
+    it('user can not unvote without vote', async function() {
+      await daoVote.unvote(0,1).should.be.rejectedWith(EVMRevert)
+    })
+
+    it('user can unvote and unvote reduce total', async function() {
+      const toMint = 777
+      await vToken.mint(userOne, toMint)
+      await daoVote.vote(0,1)
+      assert.equal(Number(await daoVote.topics(0,1)), toMint)
+
+      await daoVote.unvote(0,1)
+      assert.equal(Number(await daoVote.topics(0,1)), 0)
+    })
+  })
   //END
 })
