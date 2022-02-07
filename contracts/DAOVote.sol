@@ -2,7 +2,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 interface IERC20 {
   function balanceOf(address account) external view returns (uint256);
-  function totalSupply() external view returns (uint256);
 }
 
 contract DAOVote {
@@ -58,7 +57,7 @@ contract DAOVote {
 
   // vote
   function vote(uint256 topicId, uint256 candidateId) external {
-    verify(topicId, candidateId);
+    verify(topicId, candidateId, false);
     require(!votersData[msg.sender][topicId][candidateId].isVoted, "Voted");
 
     uint256 userBalance = token.balanceOf(msg.sender);
@@ -74,10 +73,11 @@ contract DAOVote {
 
   // unvote
   function unvote(uint256 topicId, uint256 candidateId) external {
-    verify(topicId, candidateId);
+    verify(topicId, candidateId, true);
     require(votersData[msg.sender][topicId][candidateId].isVoted, "Not voted");
 
     VoteData memory _voteData = votersData[msg.sender][topicId][candidateId];
+
     topicResults[topicId][candidateId] -= _voteData.voteBalance;
     _voteData.voteBalance = 0;
     _voteData.isVoted = false;
@@ -88,7 +88,7 @@ contract DAOVote {
   }
 
   // verify topic
-  function verify(uint256 topicId, uint256 candidateId) internal {
+  function verify(uint256 topicId, uint256 candidateId, bool isUnvoteAction) internal {
     TopicData memory topicData = topicsData[topicId];
     // verify if topice created
     require(topicData.created, "Not created");
@@ -97,5 +97,8 @@ contract DAOVote {
     // verify deadline
     if(topicData.daedlineEnabled)
       require(now < topicData.daedline, "Deadline");
+    // additional verification for unvote action
+    if(isUnvoteAction)
+      require(topicData.unvoteEnabled, "Unvote disabled");
   }
 }

@@ -52,6 +52,22 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
       await daoVote.vote(1,1).should.be.rejectedWith(EVMRevert)
     })
 
+    it('user can not vote after deadline', async function() {
+      const toMint = 777
+      await vToken.mint(userOne, toMint)
+      await daoVote.create(true, 3, true, duration.days(2))
+      await timeMachine.advanceTimeAndBlock(duration.days(2))
+      await daoVote.vote(2,1).should.be.rejectedWith(EVMRevert)
+    })
+
+    it('user can not vote for not existing candidate', async function() {
+      const toMint = 777
+      const topicData = await daoVote.topicsData(1)
+      await vToken.mint(userOne, toMint)
+      await daoVote.vote(1, Number(topicData[1]) + 1)
+      .should.be.rejectedWith(EVMRevert)
+    })
+
     it('total results should be calculated correct', async function() {
       const userOneToMint = 500
       const userTwoToMint = 1500
@@ -74,7 +90,24 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
       await daoVote.unvote(1,1).should.be.rejectedWith(EVMRevert)
     })
 
-    it('user can unvote and unvote reduce total', async function() {
+    it('user can not unvote if unvote disabled', async function() {
+      const toMint = 777
+      await vToken.mint(userOne, toMint)
+      await daoVote.create(false, 3, false, duration.days(2))
+      await daoVote.vote(2,1)
+      await daoVote.unvote(2,1).should.be.rejectedWith(EVMRevert)
+    })
+
+    it('user can not unvote after deadline', async function() {
+      const toMint = 777
+      await vToken.mint(userOne, toMint)
+      await daoVote.create(true, 3, true, duration.days(2))
+      await daoVote.vote(2,1)
+      await timeMachine.advanceTimeAndBlock(duration.days(2))
+      await daoVote.unvote(2,1).should.be.rejectedWith(EVMRevert)
+    })
+
+    it('user can unvote and unvote reduce total votes', async function() {
       const toMint = 777
       await vToken.mint(userOne, toMint)
       await daoVote.vote(1,1)
