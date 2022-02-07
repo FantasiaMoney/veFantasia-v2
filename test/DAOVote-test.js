@@ -25,6 +25,8 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
     // depoy vToken
     vToken = await VTOKEN.new("vDAO", "vDAO")
     daoVote = await DAOVote.new(vToken.address)
+
+    await daoVote.create(true, 3, false, 0)
   }
 
   beforeEach(async function() {
@@ -33,21 +35,21 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
 
   describe('Vote', function() {
     it('user can not vote with 0 balance', async function() {
-      await daoVote.vote(0,1).should.be.rejectedWith(EVMRevert)
+      await daoVote.vote(1,1).should.be.rejectedWith(EVMRevert)
     })
 
     it('user can vote with not 0 balance, and vote power should be same as balance', async function() {
       const toMint = 777
       await vToken.mint(userOne, toMint)
-      await daoVote.vote(0,1)
-      assert.equal(Number(await daoVote.topics(0,1)), toMint)
+      await daoVote.vote(1,1)
+      assert.equal(Number(await daoVote.topicResults(1,1)), toMint)
     })
 
     it('user can not vote twice', async function() {
       const toMint = 777
       await vToken.mint(userOne, toMint)
-      await daoVote.vote(0,1)
-      await daoVote.vote(0,1).should.be.rejectedWith(EVMRevert)
+      await daoVote.vote(1,1)
+      await daoVote.vote(1,1).should.be.rejectedWith(EVMRevert)
     })
 
     it('total results should be calculated correct', async function() {
@@ -57,11 +59,11 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
       await vToken.mint(userOne, userOneToMint)
       await vToken.mint(userTwo, userTwoToMint)
 
-      await daoVote.vote(0,1)
-      await daoVote.vote(0,1, { from:userTwo })
+      await daoVote.vote(1,1)
+      await daoVote.vote(1,1, { from:userTwo })
 
       assert.equal(
-        Number(await daoVote.topics(0,1)),
+        Number(await daoVote.topicResults(1,1)),
         Number(userOneToMint + userTwoToMint)
       )
     })
@@ -69,17 +71,17 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
 
   describe('Unvote', function() {
     it('user can not unvote without vote', async function() {
-      await daoVote.unvote(0,1).should.be.rejectedWith(EVMRevert)
+      await daoVote.unvote(1,1).should.be.rejectedWith(EVMRevert)
     })
 
     it('user can unvote and unvote reduce total', async function() {
       const toMint = 777
       await vToken.mint(userOne, toMint)
-      await daoVote.vote(0,1)
-      assert.equal(Number(await daoVote.topics(0,1)), toMint)
+      await daoVote.vote(1,1)
+      assert.equal(Number(await daoVote.topicResults(1,1)), toMint)
 
-      await daoVote.unvote(0,1)
-      assert.equal(Number(await daoVote.topics(0,1)), 0)
+      await daoVote.unvote(1,1)
+      assert.equal(Number(await daoVote.topicResults(1,1)), 0)
     })
   })
   //END
