@@ -28,6 +28,7 @@ const TokenToVToken = artifacts.require('./TokenToVToken.sol')
 const LDManager = artifacts.require('./LDManager.sol')
 const VTokenSale = artifacts.require('./VTokenSale.sol')
 const Fetch = artifacts.require('./Fetch.sol')
+const Treasury = artifacts.require('./Treasury.sol')
 
 
 let uniFactory,
@@ -42,7 +43,8 @@ let uniFactory,
     tokenToVToken,
     ldManager,
     vTokenSale,
-    fetch
+    fetch,
+    treasury
 
 
 contract('Fetch', function([userOne, userTwo, userThree]) {
@@ -50,6 +52,8 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
   async function deployContracts(){
     // deploy contracts
     weth = await WETH.new()
+
+    treasury = await Treasury.new()
 
     uniFactory = await UniswapV2Factory.new(userOne)
     uniRouter = await UniswapV2Router.new(uniFactory.address, weth.address)
@@ -91,7 +95,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       uniRouter.address,
       token.address,
       tokenMinter.address,
-      userOne // treasury
+      treasury.address
     )
 
     // deploy V sale
@@ -153,6 +157,8 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       assert.equal(Number(await weth.balanceOf(fetch.address)), 0)
       // fetch send all tokens
       assert.equal(Number(await token.balanceOf(fetch.address)), 0)
+      // LD manager send pool to treasury
+      assert.notEqual(Number(await pair.balanceOf(treasury.address)), 0)
 
       console.log(
         "Deposit length after ",
