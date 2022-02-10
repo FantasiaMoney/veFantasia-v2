@@ -29,7 +29,7 @@ const LDManager = artifacts.require('./LDManager.sol')
 const VTokenSale = artifacts.require('./VTokenSale.sol')
 const Fetch = artifacts.require('./Fetch.sol')
 const Treasury = artifacts.require('./Treasury.sol')
-
+const WalletDistributor = artifacts.require('./WalletDistributor.sol')
 
 let uniFactory,
     uniRouter,
@@ -44,7 +44,8 @@ let uniFactory,
     ldManager,
     vTokenSale,
     fetch,
-    treasury
+    treasury,
+    walletDistributor
 
 
 contract('Fetch', function([userOne, userTwo, userThree]) {
@@ -98,12 +99,14 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       treasury.address
     )
 
+    // deploy wallet destributor 
+    walletDistributor = await WalletDistributor.new(vToken.address)
+
     // deploy V sale
     vTokenSale = await VTokenSale.new(
       token.address,
       vTokenMinter.address,
-      userOne, // dev BENEFICIARY
-      userOne, // charity BENEFICIARY
+      walletDistributor.address,
       ldManager.address,
       uniRouter.address
     )

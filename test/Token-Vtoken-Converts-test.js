@@ -96,7 +96,6 @@ contract('Token-Vtoken-Converts-test', function([userOne, userTwo, userThree]) {
       token.address,
       vTokenMinter.address,
       userOne, // dev BENEFICIARY
-      userOne, // charity BENEFICIARY
       ldManager.address,
       uniRouter.address
     )
