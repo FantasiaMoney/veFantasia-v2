@@ -73,7 +73,7 @@ contract WalletDistributor {
 
   // check if user claimed for this period
   function isClaimed(address user) public view returns(bool){
-    return periodClaimed[msg.sender][currentPeriodIndex];
+    return periodClaimed[user][currentPeriodIndex];
   }
 
   // check if need update period
