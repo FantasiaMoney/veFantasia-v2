@@ -12,7 +12,7 @@ contract WalletDistributor {
   IERC20 public vToken;
   uint256 public currentPeriodIndex = 0;
   uint256 public periodTime = 30 days;
-  uint256 currentPeriodStart;
+  uint256 public currentPeriodStart;
 
   mapping(uint256 => uint256) public periodSharesRemoved;
   mapping(address => mapping (uint256 => bool)) public periodClaimed;
