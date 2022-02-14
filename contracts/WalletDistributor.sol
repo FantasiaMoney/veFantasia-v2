@@ -53,7 +53,7 @@ contract WalletDistributor {
 
   // calculate how much user earn
   function earned(address user) public view returns(uint256){
-    uint256 userShare = vToken.balanceOf(msg.sender);
+    uint256 userShare = vToken.balanceOf(user);
     return toClaim(userShare);
   }
 

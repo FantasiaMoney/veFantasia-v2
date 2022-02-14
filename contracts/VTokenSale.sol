@@ -14,15 +14,13 @@ contract VTokenSale is Ownable {
   using SafeMath for uint256;
 
   address payable public devFee;
-  address payable public charityFee;
 
   address public ldManager;
   address public token;
   address public vTokenMinter;
 
-  uint256 public devFeePercent = 30;
-  uint256 public charityFeePercent = 30;
-  uint256 public ldManagerPercent = 40;
+  uint256 public devFeePercent = 50;
+  uint256 public ldManagerPercent = 50;
 
   IUniswapV2Router02 public Router;
 
@@ -34,7 +32,6 @@ contract VTokenSale is Ownable {
   * @param _token         token address
   * @param _vTokenMinter  vTokenMinter address
   * @param _devFee        Address for receive ETH
-  * @param _charityFee    Address for receive ETH
   * @param _ldManager     Address of ldManager
   * @param _router        Uniswap v2 router
   */
@@ -42,7 +39,6 @@ contract VTokenSale is Ownable {
     address _token,
     address _vTokenMinter,
     address payable _devFee,
-    address payable _charityFee,
     address _ldManager,
     address _router
     )
@@ -51,7 +47,6 @@ contract VTokenSale is Ownable {
     token = _token;
     vTokenMinter = _vTokenMinter;
     devFee = _devFee;
-    charityFee = _charityFee;
     ldManager = _ldManager;
     Router = IUniswapV2Router02(_router);
   }
@@ -76,14 +71,10 @@ contract VTokenSale is Ownable {
 
     // split ETH
     (uint256 devFeeAmount,
-     uint256 charityFeeAmount,
      uint256 ldManagerAmount) = calcualteToSplit(msg.value);
 
     if(devFeeAmount > 0)
       devFee.transfer(devFeeAmount);
-
-    if(charityFeeAmount > 0)
-      charityFee.transfer(charityFeeAmount);
 
     if(ldManagerAmount > 0)
       ILDManager(ldManager).addLiquidity.value(ldManagerAmount)();
@@ -114,12 +105,10 @@ contract VTokenSale is Ownable {
    view
    returns(
      uint256 devFeeAmount,
-     uint256 charityFeeAmount,
      uint256 ldManagerAmount
    )
   {
     devFeeAmount = _amount.div(100).mul(devFeePercent);
-    charityFeeAmount = _amount.div(100).mul(charityFeePercent);
     ldManagerAmount = _amount.div(100).mul(ldManagerPercent);
   }
 
@@ -128,17 +117,15 @@ contract VTokenSale is Ownable {
   */
   function setSplit(
     uint256 _devFeePercent,
-    uint256 _charityFeePercent,
     uint256 _ldManagerPercent
   )
    external
    onlyOwner
   {
-    uint256 total = _devFeePercent.add(_charityFeePercent).add(_ldManagerPercent);
+    uint256 total = _devFeePercent.add(_ldManagerPercent);
     require(total == 100, "Wrong total");
 
     devFeePercent = _devFeePercent;
-    charityFeePercent = _charityFeePercent;
     ldManagerPercent = _ldManagerPercent;
   }
 

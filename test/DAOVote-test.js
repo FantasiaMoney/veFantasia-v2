@@ -117,5 +117,44 @@ contract('WalletDestributor-test', function([userOne, userTwo, userThree]) {
       assert.equal(Number(await daoVote.topicResults(1,1)), 0)
     })
   })
+
+  describe('Compute', function() {
+    it('lead candidate should lead', async function() {
+      const toMint = 777
+      await vToken.mint(userOne, toMint)
+      await daoVote.vote(1,1)
+      assert.equal(await daoVote.compute(1,1), true)
+    })
+
+    it('not lead candidate should not lead', async function() {
+      const toMintUserOne = 777
+      const toMintUserTwo = 1777
+
+      await vToken.mint(userOne, toMintUserOne)
+      await vToken.mint(userTwo, toMintUserTwo)
+
+      await daoVote.vote(1,1)
+      await daoVote.vote(1,2, { from:userTwo })
+
+      assert.equal(await daoVote.compute(1,1), false)
+    })
+
+    it('should be false if results equal', async function() {
+      const toMintUserOne = 777
+      const toMintUserTwo = 777
+
+      await vToken.mint(userOne, toMintUserOne)
+      await vToken.mint(userTwo, toMintUserTwo)
+
+      await daoVote.vote(1,1)
+      await daoVote.vote(1,2, { from:userTwo })
+
+      assert.equal(await daoVote.compute(1,1), false)
+    })
+
+    it('should be false if vote with 0 balance', async function() {
+      assert.equal(await daoVote.compute(1,1), false)
+    })
+  })
   //END
 })

@@ -42,6 +42,7 @@ contract DAOVote {
     uint256 daedline
   )
     external
+    returns(uint256)
   {
     TopicData memory topicData = TopicData(
       unvoteEnabled,
@@ -53,6 +54,8 @@ contract DAOVote {
 
     totalTopicIds = totalTopicIds + 1;
     topicsData[totalTopicIds] = topicData;
+
+    return totalTopicIds;
   }
 
   // vote
@@ -85,6 +88,31 @@ contract DAOVote {
     votersData[msg.sender][topicId][candidateId] = _voteData;
 
     emit Unvote(msg.sender, topicId, candidateId);
+  }
+
+  // compute if candidate is in the lead
+  function compute(uint256 topicId, uint256 candidateId)
+    external
+    view
+    returns(bool)
+  {
+    bool islead = true;
+    uint256 leadBalance = topicResults[topicId][candidateId];
+
+    // return false if lead balance equal to 0
+    if(leadBalance == 0)
+      return false;
+
+    TopicData memory topicData = topicsData[topicId];
+
+    // return false if some of candidates have
+    // more or equal balance than lead
+    for(uint256 i = 0; i < topicData.candidatesCount; i++){
+      if(topicResults[topicId][i] >= leadBalance && i != candidateId)
+        islead = false;
+    }
+
+    return islead;
   }
 
   // verify topic
