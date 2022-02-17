@@ -12,8 +12,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 
 contract Fetch is Ownable {
-
-  using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   struct Deposit {
