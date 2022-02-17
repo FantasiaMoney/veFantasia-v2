@@ -57,7 +57,7 @@ contract('Reserve-test', function([userOne, userTwo, userThree]) {
       1,
       userOne,
       "1111111111111111111111"
-    , { from:userOne, value:toWei(String(500)) })
+    , { from:userOne, value:toWei(String(5)) })
 
     pair = await UniswapV2Pair.at(await uniFactory.allPairs(0))
 
@@ -127,24 +127,19 @@ contract('Reserve-test', function([userOne, userTwo, userThree]) {
     })
 
     it('Can not be converted if enough eth but not enough deposit', async function() {
-      const requireETH = await reserve.currentRate(toDeposit)
-      await reserve.sendTransaction({
-        value: requireETH,
-        from:userOne
-      })
-      await reserve.convert(toDeposit)
+      await token.approve(reserve.address, toDeposit)
+      await reserve.deposit(toDeposit)
+      const requireETH = await reserve.currentRate(token.address, weth.address, toDeposit)
+      await reserve.buy({ from:userOne, value:requireETH  })
+      await reserve.convert(toDeposit + 1)
       .should.be.rejectedWith(EVMRevert)
     })
 
     it('Can be converted if enough eth and enough deposit', async function() {
       await token.approve(reserve.address, toDeposit)
       await reserve.deposit(toDeposit)
-
-      const requireETH = await reserve.currentRate(toDeposit)
-      await reserve.sendTransaction({
-        value: requireETH,
-        from:userOne
-      })
+      const requireETH = await reserve.currentRate(token.address, weth.address, toDeposit)
+      await reserve.buy({ from:userOne, value:requireETH  })
       await reserve.convert(toDeposit)
     })
   })

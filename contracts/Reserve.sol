@@ -28,33 +28,46 @@ contract Reserve {
     weth = _weth;
   }
 
-  // return ETH amount
-  function currentRate(uint256 _amount) public view returns(uint256 ethAmount){
+  // helper for get rate
+  function currentRate(address _from, address _to, uint256 _amount)
+    public
+    view
+    returns(uint256)
+  {
     address[] memory path = new address[](2);
-    path[0] = address(token);
-    path[1] = Router.WETH();
+    path[0] = _from;
+    path[1] = _to;
+
     uint256[] memory res = Router.getAmountsOut(_amount, path);
-    ethAmount = res[1];
+    return res[1];
   }
 
+  // deposit to reserve
   function deposit(uint256 _amount) external {
     token.safeTransferFrom(msg.sender, address(this), _amount);
     depositOf[msg.sender] = depositOf[msg.sender].add(_amount);
   }
 
+  // convert deposit to eth
   function convert(uint256 _amount) external {
     require(depositOf[msg.sender] >= _amount, "Not enough deposit");
     depositOf[msg.sender] = depositOf[msg.sender].sub(_amount);
-    uint256 ethAmount = currentRate(_amount);
+    uint256 ethAmount = currentRate(address(token), weth, _amount);
     require(address(this).balance >= ethAmount, "Not enough eth");
     payable(msg.sender).transfer(ethAmount);
   }
 
+  // withdraw deposit
   function withdraw(uint256 _amount) external {
     require(depositOf[msg.sender] >= _amount, "Not enough deposit");
     token.safeTransfer(msg.sender, _amount);
     depositOf[msg.sender] = depositOf[msg.sender].sub(_amount);
   }
 
-  fallback() external payable {}
+  // buy tokens via eth
+  function buy() external payable {
+    require(msg.value > 0, "Zero eth");
+    uint256 tokenAmount = currentRate(weth, address(token), msg.value);
+    token.safeTransfer(msg.sender, tokenAmount);
+  }
 }

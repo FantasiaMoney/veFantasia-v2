@@ -36,6 +36,8 @@ contract Fetch is Ownable {
 
   uint256 public percentToSale = 50;
 
+  uint256 public reserveSplit = 20;
+
   address public tokenToVToken;
 
   /**
@@ -108,9 +110,16 @@ contract Fetch is Ownable {
   if(ethToDex > 0)
     swapETHViaDEX(dexRouter, token, ethToDex);
 
-  // get tokens from sale
-  if(ethToSale > 0)
-    swapETHViaSale(receiver, ethToSale);
+  // get tokens from sale and reserve
+ //  if(ethToSale > 0){
+ //    if(reserveSplit > 0){
+ //      if(IERC20(token).balanceOf(address(reserve)) >= reserveSplit){
+ //
+ //      }
+ //    }else{
+ //      swapETHViaSale(receiver, ethToSale);
+ //    }
+ //  }
  }
 
  // helper for swap ETH to vtoken
@@ -161,7 +170,7 @@ contract Fetch is Ownable {
  }
 
  /**
- * @dev allow owner update split %
+ * @dev allow owner update split % with dex and sale
  */
  function updateSplitPercent(
    uint256 _percentToDex,
@@ -178,6 +187,19 @@ contract Fetch is Ownable {
  }
 
  /**
+ * @dev allow owner update split % with sale and reserve
+ */
+ function updateReserveSplit(
+   uint256 _reserveSplit
+ )
+   external
+   onlyOwner
+ {
+   require(reserveSplit <= 100, "Wrong percent");
+   reserveSplit = _reserveSplit;
+ }
+
+ /**
  * @dev allow owner withdraw eth for case if some eth stuck or was sent accidentally
  */
  function withdraw()
@@ -186,7 +208,6 @@ contract Fetch is Ownable {
  {
    payable(owner()).transfer(address(this).balance);
  }
-
 
  /**
  * @dev return length of all user deposits
