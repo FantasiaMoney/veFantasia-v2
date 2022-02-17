@@ -151,6 +151,8 @@ contract Fetch is Ownable {
 
  // helper for get tokens from Reserve
  function swapETHViaReserve(uint256 amount) internal {
+    uint256 tokensAmount = IReserve(reserve).currentRate(WETH, token, amount);
+    require(IERC20(token).balanceOf(reserve) >= tokensAmount, "Not enough tokens in reserve");
     IReserve(reserve).buy.value(amount);
  }
 
@@ -194,7 +196,7 @@ contract Fetch is Ownable {
    external
    onlyOwner
  {
-   uint256 total = _percentToDex + _percentToSale + percentToReserve;
+   uint256 total = _percentToDex + _percentToSale + _percentToReserve;
    require(total == 100, "Wrong total");
 
    percentToDex = _percentToDex;

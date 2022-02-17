@@ -1,15 +1,3 @@
-# TODO
-
-```
-DAO voting
-
-dao vote treasury
-
-LDM reserve
-
-So need create reserve in which users can put their tokens, and LDM will not use mint if can use reserve ?
-```
-
 # Description
 
 ```
@@ -34,7 +22,11 @@ Minter - allow mint for permitted addresses
 LDManager - mint tokens and add LD with token/eth
 
 
-WalletDistributor - owners of vtoken can claim from this wallet each 30 days 
+WalletDistributor - owners of vtoken can claim from this wallet each 30 days
+
+
+Reserve - fetch can split ETH with dex, sale and reserve. And users who deposiyed tokens
+in reserve can sell (also they can eran more or lose, dependse on sale rate)
 ```
 
 
