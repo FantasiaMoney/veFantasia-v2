@@ -4,6 +4,7 @@ import "./interfaces/IUniswapV2Router02.sol";
 import "./interfaces/IWETH.sol";
 import "./interfaces/ISale.sol";
 import "./interfaces/IConvert.sol";
+import "./interfaces/IReserve.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -32,11 +33,13 @@ contract Fetch is Ownable {
 
   address public sale;
 
+  address public reserve;
+
   uint256 public percentToDex = 50;
 
   uint256 public percentToSale = 50;
 
-  uint256 public reserveSplit = 20;
+  uint256 public percentToReserve = 0;
 
   address public tokenToVToken;
 
@@ -45,8 +48,9 @@ contract Fetch is Ownable {
   *
   * @param _WETH                  address of Wrapped Ethereum token
   * @param _dexRouter             address of UNI v2 DEX
-  * @param _token                 address of OHM token
+  * @param _token                 address of token
   * @param _sale                  sale
+  * @param _reserve               reserve
   * @param _tokenToVToken         token to vToken converter
   * @param _vToken                not transferable vote token
   */
@@ -55,6 +59,7 @@ contract Fetch is Ownable {
     address _dexRouter,
     address _token,
     address _sale,
+    address _reserve,
     address _tokenToVToken,
     address _vToken
     )
@@ -64,6 +69,7 @@ contract Fetch is Ownable {
     dexRouter = _dexRouter;
     token = _token;
     sale = _sale;
+    reserve = _reserve;
     tokenToVToken = _tokenToVToken;
     vToken = _vToken;
   }
@@ -87,6 +93,7 @@ contract Fetch is Ownable {
 
     // swap ETH
     swapETHInput(receiver, msg.value);
+
     // convert remains
     uint256 remains = IERC20(token).balanceOf(address(this));
     IERC20(token).approve(tokenToVToken, remains);
@@ -104,22 +111,22 @@ contract Fetch is Ownable {
  * @dev swap ETH to token via DEX and Sale
  */
  function swapETHInput(address receiver, uint256 input) internal {
-  (uint256 ethToDex, uint256 ethToSale) = calculateToSplit(input);
+  // get slit %
+  (uint256 ethToDex,
+   uint256 ethToSale,
+   uint256 ethToReserve) = calculateToSplit(input);
 
-  // get some tokens from DEX
+  // get tokens from DEX
   if(ethToDex > 0)
     swapETHViaDEX(dexRouter, token, ethToDex);
 
-  // get tokens from sale and reserve
- //  if(ethToSale > 0){
- //    if(reserveSplit > 0){
- //      if(IERC20(token).balanceOf(address(reserve)) >= reserveSplit){
- //
- //      }
- //    }else{
- //      swapETHViaSale(receiver, ethToSale);
- //    }
- //  }
+  // get V tokens from sale
+  if(ethToSale > 0)
+    swapETHViaSale(receiver, ethToSale);
+
+  // get tokens from reserve
+  if(ethToReserve > 0)
+    swapETHViaReserve(ethToReserve);
  }
 
  // helper for swap ETH to vtoken
@@ -137,9 +144,14 @@ contract Fetch is Ownable {
    );
  }
 
- // helper for get OHM from Sale via deposit
+ // helper for get V tokens from Sale
  function swapETHViaSale(address receiver, uint256 amount) internal {
     ISale(sale).buyFor.value(amount)(receiver);
+ }
+
+ // helper for get tokens from Reserve
+ function swapETHViaReserve(uint256 amount) internal {
+    IReserve(reserve).buy.value(amount);
  }
 
 
@@ -151,11 +163,13 @@ contract Fetch is Ownable {
    view
    returns (
      uint256 ethToDex,
-     uint256 ethToSale
+     uint256 ethToSale,
+     uint256 ethToReserve
    )
  {
    ethToDex = ethInput.div(100).mul(percentToDex);
    ethToSale = ethInput.div(100).mul(percentToSale);
+   ethToReserve = ethInput.div(100).mul(percentToReserve);
  }
 
  /**
@@ -164,39 +178,28 @@ contract Fetch is Ownable {
  function calculateToSplit(uint256 ethInput)
    public
    view
-   returns(uint256 ethToDex, uint256 ethToSale)
+   returns(uint256 ethToDex, uint256 ethToSale, uint256 ethToReserve)
  {
-   (ethToDex, ethToSale) = calculateToSplitETH(ethInput);
+   (ethToDex, ethToSale, ethToReserve) = calculateToSplitETH(ethInput);
  }
 
  /**
- * @dev allow owner update split % with dex and sale
+ * @dev allow owner update split % with dex, sale and reserve
  */
  function updateSplitPercent(
    uint256 _percentToDex,
-   uint256 _percentToSale
+   uint256 _percentToSale,
+   uint256 _percentToReserve
  )
    external
    onlyOwner
  {
-   uint256 total = _percentToDex + _percentToSale;
+   uint256 total = _percentToDex + _percentToSale + percentToReserve;
    require(total == 100, "Wrong total");
 
    percentToDex = _percentToDex;
    percentToSale = _percentToSale;
- }
-
- /**
- * @dev allow owner update split % with sale and reserve
- */
- function updateReserveSplit(
-   uint256 _reserveSplit
- )
-   external
-   onlyOwner
- {
-   require(reserveSplit <= 100, "Wrong percent");
-   reserveSplit = _reserveSplit;
+   percentToReserve = _percentToReserve;
  }
 
  /**
