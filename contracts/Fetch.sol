@@ -5,6 +5,7 @@ import "./interfaces/IWETH.sol";
 import "./interfaces/ISale.sol";
 import "./interfaces/IConvert.sol";
 import "./interfaces/IReserve.sol";
+import "./interfaces/IDepositsDB.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -14,14 +15,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Fetch is Ownable {
   using SafeMath for uint256;
-
-  struct Deposit {
-    uint256 balanceBefore;
-    uint256 balanceAfter;
-    uint256 time;
-  }
-
-  mapping (address => Deposit[]) public depositsPerUser;
 
   address public WETH;
 
@@ -43,6 +36,8 @@ contract Fetch is Ownable {
 
   address public tokenToVToken;
 
+  IDepositsDB public depositsDB;
+
   /**
   * @dev constructor
   *
@@ -53,6 +48,7 @@ contract Fetch is Ownable {
   * @param _reserve               reserve
   * @param _tokenToVToken         token to vToken converter
   * @param _vToken                not transferable vote token
+  * @param _depositsDB            depositsDB contract
   */
   constructor(
     address _WETH,
@@ -61,7 +57,8 @@ contract Fetch is Ownable {
     address _sale,
     address _reserve,
     address _tokenToVToken,
-    address _vToken
+    address _vToken,
+    address _depositsDB
     )
     public
   {
@@ -72,6 +69,7 @@ contract Fetch is Ownable {
     reserve = _reserve;
     tokenToVToken = _tokenToVToken;
     vToken = _vToken;
+    depositsDB = IDepositsDB(_depositsDB);
   }
 
   // convert for msg.sender
@@ -101,9 +99,8 @@ contract Fetch is Ownable {
 
     uint256 balanceAfter = IERC20(vToken).balanceOf(receiver);
 
-    // write data
-    Deposit memory deposit = Deposit(balanceBefore, balanceAfter, now);
-    depositsPerUser[receiver].push(deposit);
+    // update data
+    depositsDB.deposit(receiver, balanceBefore, balanceAfter);
   }
 
 
@@ -212,18 +209,6 @@ contract Fetch is Ownable {
    onlyOwner
  {
    payable(owner()).transfer(address(this).balance);
- }
-
- /**
- * @dev return length of all user deposits
- */
- function totalUserDeposits(address user)
-   external
-   view
-   returns(uint256)
- {
-    Deposit[] memory deposits = depositsPerUser[user];
-    return deposits.length;
  }
 
  fallback() external payable {}

@@ -31,6 +31,7 @@ const Fetch = artifacts.require('./Fetch.sol')
 const Treasury = artifacts.require('./Treasury.sol')
 const WalletDistributor = artifacts.require('./WalletDistributor.sol')
 const Reserve = artifacts.require('./Reserve.sol')
+const DepositsDB = artifacts.require('./DepositsDB.sol')
 
 
 let uniFactory,
@@ -48,7 +49,8 @@ let uniFactory,
     fetch,
     treasury,
     walletDistributor,
-    reserve
+    reserve,
+    depositsDB
 
 
 contract('Fetch', function([userOne, userTwo, userThree]) {
@@ -125,6 +127,9 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     // deploy reserve
     reserve = await Reserve.new(token.address, uniRouter.address, weth.address)
 
+    // deploy deposists DB
+    depositsDB = await DepositsDB.new()
+
     // deploy fetch
     fetch = await Fetch.new(
       weth.address,
@@ -133,11 +138,15 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
       vTokenSale.address,
       reserve.address,
       tokenToVToken.address,
-      vToken.address
+      vToken.address,
+      depositsDB.address
     )
 
-    // set fetch
-    await vTokenToToken.setFetch(fetch.address)
+    // set fetch in depositsDB
+    await depositsDB.updatePermitted(fetch.address, true)
+
+    // set depositsDB in vToken converter
+    await vTokenToToken.setDepositsDB(depositsDB.address)
   }
 
   beforeEach(async function() {
@@ -148,7 +157,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     it('Convert input to vToken', async function() {
       console.log(
         "Deposit length before ",
-        Number(await fetch.totalUserDeposits(userTwo))
+        Number(await depositsDB.totalUserDeposits(userTwo))
       )
 
       // user two not hold any vtoken before deposit
@@ -172,7 +181,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
 
       console.log(
         "Deposit length after ",
-        Number(await fetch.totalUserDeposits(userTwo))
+        Number(await depositsDB.totalUserDeposits(userTwo))
       )
     })
 
@@ -201,7 +210,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     it('to reedem should be calculated correct', async function() {
       // deposit in fetch
       await fetch.convert({ from:userTwo, value:toWei(String(1)) })
-      const depositData = await fetch.depositsPerUser(userTwo, 0)
+      const depositData = await depositsDB.depositsPerUser(userTwo, 0)
       const userBalance = depositData[1] - depositData[0]
 
       console.log(
@@ -267,7 +276,7 @@ contract('Fetch', function([userOne, userTwo, userThree]) {
     it('Calculate reedem', async function() {
       // deposit in fetch
       await fetch.convert({ from:userTwo, value:toWei(String(1)) })
-      const depositData = await fetch.depositsPerUser(userTwo, 0)
+      const depositData = await depositsDB.depositsPerUser(userTwo, 0)
       const userBalance = depositData[1] - depositData[0]
 
       let totalDays = 0

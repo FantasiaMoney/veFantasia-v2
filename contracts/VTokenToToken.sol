@@ -2,7 +2,7 @@ pragma solidity ^0.6.2;
 
 import "./interfaces/IBurn.sol";
 import "./interfaces/IMint.sol";
-import "./interfaces/IFetch.sol";
+import "./interfaces/IDepositsDB.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
@@ -11,7 +11,7 @@ contract VTokenToToken is Ownable {
 
   address public tokenMinter;
   address public vToken;
-  address public fetch = address(0);
+  address public depositsDB = address(0);
 
   mapping (address => mapping (uint256 => bool)) public timeUsed;
 
@@ -20,20 +20,20 @@ contract VTokenToToken is Ownable {
     vToken = _vToken;
   }
 
-  function setFetch(address _fetch) external onlyOwner {
-    fetch = _fetch;
+  function setDepositsDB(address _depositsDB) external onlyOwner {
+    depositsDB = _depositsDB;
   }
 
   // convert vToken to token
   // rate depends on time
   // max rate 1 to 1
   function convert(address _to, uint256 _depositId, uint256 _amount) external {
-    require(fetch != address(0), "Zerro fetch");
+    require(depositsDB != address(0), "Zerro depositsDB");
 
     // get deposit data
     (uint256 balanceBefore,
      uint256 balanceAfter,
-     uint256 time) = IFetch(fetch).depositsPerUser(_to, _depositId);
+     uint256 time) = IDepositsDB(depositsDB).depositsPerUser(_to, _depositId);
 
     // check if time not used before for this user
     require(timeUsed[_to][time] == false, "Time used");
